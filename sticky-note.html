@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Sticky Note - Giải phóng miền Nam</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background-color: #000;
+      background-image: radial-gradient(circle, #ff0000 0%, #000000 100%);
+      background-size: cover;
+      overflow-x: hidden;
+      animation: backgroundPulse 10s infinite alternate;
+    }
+  
+    @keyframes backgroundPulse {
+      0% { background-color: #000; }
+      100% { background-color: #300000; }
+    }
+  
+    .banner {
+      width: 100%;
+      background: linear-gradient(45deg, red, gold);
+      color: yellow;
+      font-weight: bold;
+      text-align: center;
+      font-size: 32px;
+      padding: 12px;
+      animation: marquee 14s linear infinite, glowText 2s ease-in-out infinite alternate;
+      white-space: nowrap;
+      text-shadow: 2px 2px 8px #ff0;
+      border-bottom: 5px solid gold;
+    }
+  
+    @keyframes marquee {
+      0% { transform: translateX(100%) }
+      100% { transform: translateX(-100%) }
+    }
+  
+    @keyframes glowText {
+      0% { text-shadow: 0 0 10px yellow, 0 0 20px red; }
+      100% { text-shadow: 0 0 20px white, 0 0 40px orange; }
+    }
+  
+    .flag {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      width: 80px;
+      animation: wave 1.5s infinite;
+      filter: drop-shadow(2px 2px 4px gold);
+    }
+  
+    @keyframes wave {
+      0%, 100% { transform: rotate(-8deg); }
+      50% { transform: rotate(8deg); }
+    }
+  
+    .tank {
+      position: fixed;
+      bottom: 20px;
+      left: -200px;
+      width: 180px;
+      animation: tankMove 12s linear infinite;
+      filter: drop-shadow(3px 3px 6px green);
+    }
+  
+    @keyframes tankMove {
+      0% { left: -200px; }
+      100% { left: 110%; }
+    }
+  
+    #noteContainer {
+      margin: 140px auto;
+      width: 90%;
+      max-width: 650px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid gold;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px yellow;
+      position: relative;
+      z-index: 2;
+      backdrop-filter: blur(6px);
+      color: white;
+    }
+  
+    textarea {
+      width: 100%;
+      height: 300px;
+      font-size: 16px;
+      padding: 12px;
+      background: #fff8dc;
+      color: #000;
+      border-radius: 8px;
+      box-shadow: inset 0 0 8px #ccc;
+      resize: none;
+box-sizing: border-box;
+
+    }
+  
+    button {
+      margin: 10px 5px 0 0;
+      padding: 10px 15px;
+      font-size: 16px;
+      background-color: red;
+      color: yellow;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 0 10px yellow;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+  
+    button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px white;
+    }
+  
+    .theme-selector {
+      margin-top: 15px;
+      color: gold;
+      font-weight: bold;
+    }
+  
+    select {
+      padding: 6px 10px;
+      font-size: 14px;
+      border-radius: 6px;
+      background: #ffd700;
+      color: black;
+      font-weight: bold;
+      border: none;
+      box-shadow: 0 0 6px orange;
+    }
+  
+  </style>
+  
+</head>
+<body>
+
+  <!-- 🇻🇳 Banner -->
+  <div class="banner">✊ Kỷ niệm 50 năm Ngày Giải phóng miền Nam, thống nhất đất nước 30/4 ✊</div>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/2/21/Flag_of_Vietnam.svg" class="flag">
+  
+
+  <!-- 🎵 Nút phát âm thanh YouTube -->
+  <div style="text-align:center; margin-top: 20px;">
+    <button onclick="playAudio()">🎧 Phát nhạc</button>
+    <div id="player" style="display:none;"></div>
+  </div>
+
+  <!-- 📝 Note -->
+  <div id="noteContainer">
+    <textarea id="noteText"></textarea>
+    <div>
+      <button onclick="saveNote()">💾 Lưu</button>
+      <button onclick="clearNote()">🗑️ Xóa</button>
+      <button onclick="tinhTong()">➕ Tính tổng</button>
+    </div>
+    <div class="theme-selector">
+      <label>🌈 Theme: </label>
+      <select onchange="changeTheme(this.value)">
+        <option value="default">Mặc định</option>
+        <option value="frog">Ếch xanh</option>
+        <option value="onepiece">One Piece</option>
+        <option value="doremon">Doremon</option>
+      </select>
+    </div>
+  </div>
+
+  <script>
+    const textarea = document.getElementById('noteText');
+    textarea.value = localStorage.getItem('stickyNote') || '';
+
+    function saveNote() {
+      localStorage.setItem('stickyNote', textarea.value);
+      alert('Đã lưu ghi chú!');
+    }
+
+    function clearNote() {
+      textarea.value = '';
+      localStorage.removeItem('stickyNote');
+    }
+
+    function tinhTong() {
+      let lines = textarea.value.split('\n');
+      lines = lines.filter(line => !line.trim().startsWith('Tổng tiền chưa lấy'));
+
+      let total = 0;
+      for (let line of lines) {
+        const numbers = line.match(/\d+/g);
+        if (numbers && numbers.length > 0) {
+          total += parseInt(numbers[numbers.length - 1]);
+        }
+      }
+
+      const formatted = total.toLocaleString('vi-VN') + '₫';
+      const chu = convertNumberToWords(total);
+      lines.push(`Tổng tiền chưa lấy: ${formatted}`);
+      lines.push(`→ ${chu.charAt(0).toUpperCase() + chu.slice(1)} đồng`);
+
+      textarea.value = lines.join('\n');
+      saveNote();
+    }
+
+    function convertNumberToWords(number) {
+      const ChuSo = ["không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"];
+      function docSo3ChuSo(baso) {
+        let tram = Math.floor(baso / 100);
+        let chuc = Math.floor((baso % 100) / 10);
+        let donvi = baso % 10;
+        let result = "";
+
+        if (tram > 0) {
+          result += ChuSo[tram] + " trăm";
+          if (chuc === 0 && donvi > 0) result += " linh";
+        }
+        if (chuc > 0) {
+          result += " " + (chuc === 1 ? "mười" : ChuSo[chuc] + " mươi");
+          if (donvi === 1) result += " mốt";
+          else if (donvi === 5) result += " lăm";
+          else if (donvi > 0) result += " " + ChuSo[donvi];
+        } else if (donvi > 0 && tram === 0) {
+          result += ChuSo[donvi];
+        } else if (donvi > 0) {
+          result += " " + ChuSo[donvi];
+        }
+        return result.trim();
+      }
+
+      if (number === 0) return "không";
+
+      let result = "";
+      const donvi = ["", " nghìn", " triệu", " tỷ", " nghìn tỷ"];
+      let i = 0;
+
+      while (number > 0) {
+        let temp = number % 1000;
+        if (temp !== 0) {
+          result = docSo3ChuSo(temp) + donvi[i] + " " + result;
+        }
+        number = Math.floor(number / 1000);
+        i++;
+      }
+
+      return result.trim();
+    }
+
+    function playAudio() {
+      const iframe = document.createElement("iframe");
+      iframe.width = 0;
+      iframe.height = 0;
+      iframe.src = "https://www.youtube.com/embed/LGJzl4EU8E4?autoplay=1";
+      iframe.allow = "autoplay";
+      iframe.style.display = "none";
+      document.getElementById("player").innerHTML = "";
+      document.getElementById("player").appendChild(iframe);
+    }
+
+    function changeTheme(theme) {
+      switch(theme) {
+        case "frog":
+          document.body.style.backgroundImage = "url('https://i.imgur.com/Lq2OcWi.jpeg')";
+          break;
+        case "onepiece":
+          document.body.style.backgroundImage = "url('https://i.imgur.com/BqXADyI.jpeg')";
+          break;
+        case "doremon":
+          document.body.style.backgroundImage = "url('https://i.imgur.com/CN4fToD.jpeg')";
+          break;
+        default:
+          document.body.style.backgroundImage = "";
+      }
+      document.body.style.backgroundSize = "cover";
+      document.body.style.backgroundRepeat = "no-repeat";
+    }
+  </script>
+
+</body>
+</html>
